@@ -1,4 +1,4 @@
-# Custom Protocol Detection in Browser
+# Custom Protocol Check in Browser
 
 Detect whether a custom protocol is available in browser (FF, Chrome, IE8, IE9, IE10, IE11, and Edge)
 
