@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
+  <head lang="en">
+    <meta charset="UTF-8" />
+    <title>Custom Protocol Check</title>
+  </head>
 
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>Custom Protocol Detection</title>
-</head>
+  <body>
+    <h3>
+      Click one of the below links. If custom protocol is not supported then it
+      should give message "This protocol is not supported." otherwise it should
+      open default email client.
+    </h3>
 
-<body>
-    <h1>Click one of these labels:</h1>
-
-    <div href="blahblah:randomstuff">Non-exist protocol
-    </div>
-    <div href="mailto:johndoe@somewhere.com">Send email
-    </div>
+    <a href="blahblah:randomstuff">Non-exist protocol</a><br />
+    <a href="mailto:helloworld@somewhere.com">Send email</a>
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="protocolcheck.js"></script>
+    <script src="protocol-check.js"></script>
     <script src="example.js"></script>
-</body>
-
+  </body>
 </html>
