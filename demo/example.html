@@ -6,16 +6,20 @@
   </head>
 
   <body>
-    <h3>
+    <h4>
       Click one of the below links. If custom protocol is not supported then it
       should give message "This protocol is not supported." otherwise it should
-      open default email client.
-    </h3>
+      open default app associated with that custom protocol.
+    </h4>
 
-    <a href="blahblah:randomstuff">Non-exist protocol</a><br />
-    <a href="mailto:helloworld@somewhere.com">Send email</a>
+    <a id="aNonExistCustomProtocol" result="" href="blahblah://randomstuff"
+      >Custom protocol which does not exist</a
+    ><br />
+    <a id="aExistingProtocol" result="" href="mailto:abc@def.com"
+      >Existing custom protocol</a
+    >
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="protocol-check.js"></script>
+    <script src="custom-protocol-check.min.js"></script>
     <script src="example.js"></script>
   </body>
 </html>

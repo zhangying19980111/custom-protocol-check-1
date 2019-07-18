@@ -1,4 +1,4 @@
-function _registerEvent(target, eventType, cb) {
+const _registerEvent = (target, eventType, cb) => {
   if (target.addEventListener) {
     target.addEventListener(eventType, cb);
     return {
@@ -14,65 +14,65 @@ function _registerEvent(target, eventType, cb) {
       }
     };
   }
-}
+};
 
-function _createHiddenIframe(target, uri) {
-  var iframe = document.createElement("iframe");
+const _createHiddenIframe = (target, uri) => {
+  let iframe = document.createElement("iframe");
   iframe.src = uri;
   iframe.id = "hiddenIframe";
   iframe.style.display = "none";
   target.appendChild(iframe);
 
   return iframe;
-}
+};
 
-function openUriWithHiddenFrame(uri, failCb, successCb) {
-  var timeout = setTimeout(function() {
+const openUriWithHiddenFrame = (uri, failCb, successCb) => {
+  const timeout = setTimeout(function() {
     failCb();
     handler.remove();
   }, 1000);
 
-  var iframe = document.querySelector("#hiddenIframe");
+  let iframe = document.querySelector("#hiddenIframe");
   if (!iframe) {
     iframe = _createHiddenIframe(document.body, "about:blank");
   }
 
-  var handler = _registerEvent(window, "blur", onBlur);
-
-  function onBlur() {
+  onBlur = () => {
     clearTimeout(timeout);
     handler.remove();
     successCb();
-  }
+  };
+
+  let handler = _registerEvent(window, "blur", onBlur);
 
   iframe.contentWindow.location.href = uri;
-}
+};
 
-function openUriWithTimeoutHack(uri, failCb, successCb) {
-  var timeout = setTimeout(function() {
+const openUriWithTimeoutHack = (uri, failCb, successCb) => {
+  const timeout = setTimeout(function() {
     failCb();
     handler.remove();
   }, 1000);
 
   //handle page running in an iframe (blur must be registered with top level window)
-  var target = window;
+  let target = window;
   while (target != target.parent) {
     target = target.parent;
   }
 
-  var handler = _registerEvent(target, "blur", onBlur);
-
-  function onBlur() {
+  onBlur = () => {
     clearTimeout(timeout);
     handler.remove();
     successCb();
-  }
+  };
+
+  let handler = _registerEvent(target, "blur", onBlur);
 
   window.location = uri;
-}
+};
 
-function openUriUsingFirefox(uri, failCb, successCb) {
-  var iframe = document.querySelector("#hiddenIframe");
+const openUriUsingFirefox = (uri, failCb, successCb) => {
+  let iframe = document.querySelector("#hiddenIframe");
 
   if (!iframe) {
     iframe = _createHiddenIframe(document.body, "about:blank");
@@ -86,9 +86,9 @@ function openUriUsingFirefox(uri, failCb, successCb) {
       failCb();
     }
   }
-}
+};
 
-function openUriUsingIEInOlderWindows(uri, failCb, successCb) {
+const openUriUsingIEInOlderWindows = (uri, failCb, successCb) => {
   if (getInternetExplorerVersion() === 10) {
     openUriUsingIE10InWindows7(uri, failCb, successCb);
   } else if (
@@ -99,16 +99,16 @@ function openUriUsingIEInOlderWindows(uri, failCb, successCb) {
   } else {
     openUriInNewWindowHack(uri, failCb, successCb);
   }
-}
+};
 
-function openUriUsingIE10InWindows7(uri, failCb, successCb) {
-  var timeout = setTimeout(failCb, 1000);
+const openUriUsingIE10InWindows7 = (uri, failCb, successCb) => {
+  const timeout = setTimeout(failCb, 1000);
   window.addEventListener("blur", function() {
     clearTimeout(timeout);
     successCb();
   });
 
-  var iframe = document.querySelector("#hiddenIframe");
+  let iframe = document.querySelector("#hiddenIframe");
   if (!iframe) {
     iframe = _createHiddenIframe(document.body, "about:blank");
   }
@@ -118,10 +118,10 @@ function openUriUsingIE10InWindows7(uri, failCb, successCb) {
     failCb();
     clearTimeout(timeout);
   }
-}
+};
 
-function openUriInNewWindowHack(uri, failCb, successCb) {
-  var myWindow = window.open("", "", "width=0,height=0");
+const openUriInNewWindowHack = (uri, failCb, successCb) => {
+  let myWindow = window.open("", "", "width=0,height=0");
 
   myWindow.document.write("<iframe src='" + uri + "'></iframe>");
 
@@ -135,15 +135,15 @@ function openUriInNewWindowHack(uri, failCb, successCb) {
       failCb();
     }
   }, 1000);
-}
+};
 
-function openUriWithMsLaunchUri(uri, failCb, successCb) {
+const openUriWithMsLaunchUri = (uri, failCb, successCb) => {
   navigator.msLaunchUri(uri, successCb, failCb);
-}
+};
 
-function checkBrowser() {
-  var isOpera = !!window.opera || navigator.userAgent.indexOf(" OPR/") >= 0;
-  var ua = navigator.userAgent.toLowerCase();
+const checkBrowser = () => {
+  const isOpera = !!window.opera || navigator.userAgent.indexOf(" OPR/") >= 0;
+  const ua = navigator.userAgent.toLowerCase();
   return {
     isOpera: isOpera,
     isFirefox: typeof InstallTrigger !== "undefined",
@@ -156,47 +156,49 @@ function checkBrowser() {
     isChrome: !!window.chrome && !isOpera,
     isIE: /*@cc_on!@*/ false || !!document.documentMode // At least IE6
   };
-}
+};
 
-function getInternetExplorerVersion() {
-  var rv = -1;
+const getInternetExplorerVersion = () => {
+  let rv = -1,
+    ua,
+    re;
   if (navigator.appName === "Microsoft Internet Explorer") {
-    var ua = navigator.userAgent;
-    var re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})");
+    ua = navigator.userAgent;
+    re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})");
     if (re.exec(ua) != null) rv = parseFloat(RegExp.$1);
   } else if (navigator.appName === "Netscape") {
-    var ua = navigator.userAgent;
-    var re = new RegExp("Trident/.*rv:([0-9]{1,}[.0-9]{0,})");
+    ua = navigator.userAgent;
+    re = new RegExp("Trident/.*rv:([0-9]{1,}[.0-9]{0,})");
     if (re.exec(ua) != null) {
       rv = parseFloat(RegExp.$1);
     }
   }
   return rv;
-}
+};
 
-function getBrowserVersion() {
-  var ua = navigator.userAgent,
-    tem,
+const getBrowserVersion = () => {
+  const ua = navigator.userAgent;
+  let tem,
     M =
       ua.match(
         /(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i
       ) || [];
   if (/trident/i.test(M[1])) {
     tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    return tem[1] || "";
+    return parseInt(tem[1] || "");
   }
   if (M[1] === "Chrome") {
     tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
     if (tem != null) {
-      return tem[2];
+      return parseInt(tem[2]);
     }
   }
   M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, "-?"];
   if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
-  return M[1];
-}
+  return parseInt(M[1]);
+};
 
-module.exports = function(uri, failCb, successCb, unsupportedCb) {
+const protocolCheck = (uri, failCb, successCb, unsupportedCb) => {
   function failCallback() {
     failCb && failCb();
   }
@@ -205,15 +207,18 @@ module.exports = function(uri, failCb, successCb, unsupportedCb) {
     successCb && successCb();
   }
 
+  function unsupportedCallback() {
+    unsupportedCb && unsupportedCb();
+  }
+
   if (navigator.msLaunchUri) {
     //for IE and Edge in Win 8 and Win 10
     openUriWithMsLaunchUri(uri, failCb, successCb);
   } else {
-    var browser = checkBrowser();
-
+    let browser = checkBrowser();
     if (browser.isFirefox) {
-      var browserVersion = getBrowserVersion();
-      if (parseInt(browserVersion) >= 64) {
+      const browserVersion = getBrowserVersion();
+      if (browserVersion >= 64) {
         openUriWithHiddenFrame(uri, failCallback, successCallback);
       } else {
         openUriUsingFirefox(uri, failCallback, successCallback);
@@ -225,8 +230,10 @@ module.exports = function(uri, failCb, successCb, unsupportedCb) {
     } else if (browser.isSafari) {
       openUriWithHiddenFrame(uri, failCallback, successCallback);
     } else {
-      unsupportedCb();
       //not supported, implement please
+      unsupportedCallback();
     }
   }
 };
+
+module.exports = protocolCheck;
