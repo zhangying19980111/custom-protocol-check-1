@@ -1,4 +1,107 @@
-const _registerEvent = (target, eventType, cb) => {
+const browser = {
+  getUserAgent: function() {
+    return window.navigator.userAgent;
+  },
+
+  userAgentContains: function(browserName) {
+    browserName = browserName.toLowerCase();
+    return (
+      this.getUserAgent()
+        .toLowerCase()
+        .indexOf(browserName) > -1
+    );
+  },
+
+  isOSX: function() {
+    return this.userAgentContains("Macintosh");
+  },
+
+  isFirefox: function() {
+    return this.userAgentContains("firefox");
+  },
+
+  isInternetExplorer: function() {
+    return this.userAgentContains("trident");
+  },
+  /**
+   * Detects IE 11 and older
+   * @return {Boolean} Returns true when IE 11 and older
+   */
+  isIE: function() {
+    var ua = this.getUserAgent().toLowerCase();
+
+    // Test values.
+    // Uncomment to check result
+
+    // IE 10
+    // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+
+    // IE 11
+    // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko/20100101 Firefox/12.0';
+
+    var msie = ua.indexOf("msie");
+    if (msie > 0) {
+      // IE 10 or older
+      return true;
+    }
+
+    var trident = ua.indexOf("trident/");
+    if (trident > 0) {
+      // IE 11
+      return true;
+    }
+
+    // other browser
+    return false;
+  },
+
+  isEdge: function() {
+    var ua = this.getUserAgent().toLowerCase();
+
+    // Test values.
+    // Uncomment to check result
+
+    // Edge
+    // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240';
+
+    var edge = ua.indexOf("edge");
+    if (edge > 0) {
+      return true;
+    }
+
+    return false;
+  },
+
+  isChrome: function() {
+    // IE11 returns undefined for window.chrome
+    // and new Opera 30 outputs true for window.chrome
+    // but needs to check if window.opr is not undefined
+    // and new IE Edge outputs to true for window.chrome
+    // and if not iOS Chrome check
+    const isChromium = window.chrome;
+    const winNav = window.navigator;
+    const vendorName = winNav.vendor;
+    const isOpera = typeof window.opr !== "undefined";
+    const isIEedge = winNav.userAgent.indexOf("Edge") > -1;
+    const isIOSChrome = winNav.userAgent.match("CriOS");
+    return (
+      (isChromium !== null &&
+        typeof isChromium !== "undefined" &&
+        vendorName === "Google Inc." &&
+        isOpera === false &&
+        isIEedge === false) ||
+      isIOSChrome
+    );
+  },
+
+  isOpera: function() {
+    return this.userAgentContains(" OPR/");
+  }
+};
+
+const DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT = 2000;
+
+const registerEvent = (target, eventType, cb) => {
   if (target.addEventListener) {
     target.addEventListener(eventType, cb);
     return {
@@ -16,7 +119,7 @@ const _registerEvent = (target, eventType, cb) => {
   }
 };
 
-const _createHiddenIframe = (target, uri) => {
+const createHiddenIframe = (target, uri) => {
   let iframe = document.createElement("iframe");
   iframe.src = uri;
   iframe.id = "hiddenIframe";
@@ -30,11 +133,11 @@ const openUriWithHiddenFrame = (uri, failCb, successCb) => {
   const timeout = setTimeout(function() {
     failCb();
     handler.remove();
-  }, 1000);
+  }, DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT);
 
   let iframe = document.querySelector("#hiddenIframe");
   if (!iframe) {
-    iframe = _createHiddenIframe(document.body, "about:blank");
+    iframe = createHiddenIframe(document.body, "about:blank");
   }
 
   onBlur = () => {
@@ -42,8 +145,7 @@ const openUriWithHiddenFrame = (uri, failCb, successCb) => {
     handler.remove();
     successCb();
   };
-
-  let handler = _registerEvent(window, "blur", onBlur);
+  const handler = registerEvent(window, "blur", onBlur);
 
   iframe.contentWindow.location.href = uri;
 };
@@ -52,11 +154,11 @@ const openUriWithTimeoutHack = (uri, failCb, successCb) => {
   const timeout = setTimeout(function() {
     failCb();
     handler.remove();
-  }, 1000);
+  }, DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT);
 
   //handle page running in an iframe (blur must be registered with top level window)
   let target = window;
-  while (target != target.parent) {
+  while (target.parent && target != target.parent) {
     target = target.parent;
   }
 
@@ -66,7 +168,7 @@ const openUriWithTimeoutHack = (uri, failCb, successCb) => {
     successCb();
   };
 
-  let handler = _registerEvent(target, "blur", onBlur);
+  const handler = registerEvent(target, "blur", onBlur);
 
   window.location = uri;
 };
@@ -75,7 +177,7 @@ const openUriUsingFirefox = (uri, failCb, successCb) => {
   let iframe = document.querySelector("#hiddenIframe");
 
   if (!iframe) {
-    iframe = _createHiddenIframe(document.body, "about:blank");
+    iframe = createHiddenIframe(document.body, "about:blank");
   }
 
   try {
@@ -88,96 +190,12 @@ const openUriUsingFirefox = (uri, failCb, successCb) => {
   }
 };
 
-const openUriUsingIEInOlderWindows = (uri, failCb, successCb) => {
-  if (getInternetExplorerVersion() === 10) {
-    openUriUsingIE10InWindows7(uri, failCb, successCb);
-  } else if (
-    getInternetExplorerVersion() === 9 ||
-    getInternetExplorerVersion() === 11
-  ) {
-    openUriWithHiddenFrame(uri, failCb, successCb);
-  } else {
-    openUriInNewWindowHack(uri, failCb, successCb);
-  }
-};
-
-const openUriUsingIE10InWindows7 = (uri, failCb, successCb) => {
-  const timeout = setTimeout(failCb, 1000);
-  window.addEventListener("blur", function() {
-    clearTimeout(timeout);
-    successCb();
-  });
-
-  let iframe = document.querySelector("#hiddenIframe");
-  if (!iframe) {
-    iframe = _createHiddenIframe(document.body, "about:blank");
-  }
-  try {
-    iframe.contentWindow.location.href = uri;
-  } catch (e) {
-    failCb();
-    clearTimeout(timeout);
-  }
-};
-
-const openUriInNewWindowHack = (uri, failCb, successCb) => {
-  let myWindow = window.open("", "", "width=0,height=0");
-
-  myWindow.document.write("<iframe src='" + uri + "'></iframe>");
-
-  setTimeout(function() {
-    try {
-      myWindow.location.href;
-      myWindow.setTimeout("window.close()", 1000);
-      successCb();
-    } catch (e) {
-      myWindow.close();
-      failCb();
-    }
-  }, 1000);
-};
-
 const openUriWithMsLaunchUri = (uri, failCb, successCb) => {
   navigator.msLaunchUri(uri, successCb, failCb);
 };
 
-const checkBrowser = () => {
-  const isOpera = !!window.opera || navigator.userAgent.indexOf(" OPR/") >= 0;
-  const ua = navigator.userAgent.toLowerCase();
-  return {
-    isOpera: isOpera,
-    isFirefox: typeof InstallTrigger !== "undefined",
-    isSafari:
-      (~ua.indexOf("safari") && !~ua.indexOf("chrome")) ||
-      Object.prototype.toString
-        .call(window.HTMLElement)
-        .indexOf("Constructor") > 0,
-    isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
-    isChrome: !!window.chrome && !isOpera,
-    isIE: /*@cc_on!@*/ false || !!document.documentMode // At least IE6
-  };
-};
-
-const getInternetExplorerVersion = () => {
-  let rv = -1,
-    ua,
-    re;
-  if (navigator.appName === "Microsoft Internet Explorer") {
-    ua = navigator.userAgent;
-    re = new RegExp("MSIE ([0-9]{1,}[.0-9]{0,})");
-    if (re.exec(ua) != null) rv = parseFloat(RegExp.$1);
-  } else if (navigator.appName === "Netscape") {
-    ua = navigator.userAgent;
-    re = new RegExp("Trident/.*rv:([0-9]{1,}[.0-9]{0,})");
-    if (re.exec(ua) != null) {
-      rv = parseFloat(RegExp.$1);
-    }
-  }
-  return rv;
-};
-
 const getBrowserVersion = () => {
-  const ua = navigator.userAgent;
+  const ua = window.navigator.userAgent;
   let tem,
     M =
       ua.match(
@@ -185,53 +203,63 @@ const getBrowserVersion = () => {
       ) || [];
   if (/trident/i.test(M[1])) {
     tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
-    return parseInt(tem[1] || "");
+    return parseFloat(tem[1]) || "";
   }
   if (M[1] === "Chrome") {
     tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
     if (tem != null) {
-      return parseInt(tem[2]);
+      return parseFloat(tem[2]);
     }
   }
-  M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, "-?"];
+  M = M[2]
+    ? [M[1], M[2]]
+    : [window.navigator.appName, window.navigator.appVersion, "-?"];
   if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
-  return parseInt(M[1]);
+  return parseFloat(M[1]);
 };
 
 const protocolCheck = (uri, failCb, successCb, unsupportedCb) => {
-  function failCallback() {
+  const failCallback = () => {
     failCb && failCb();
-  }
+  };
 
-  function successCallback() {
+  const successCallback = () => {
     successCb && successCb();
-  }
+  };
 
-  function unsupportedCallback() {
+  const unsupportedCallback = () => {
     unsupportedCb && unsupportedCb();
-  }
+  };
 
-  if (navigator.msLaunchUri) {
-    //for IE and Edge in Win 8 and Win 10
-    openUriWithMsLaunchUri(uri, failCb, successCb);
-  } else {
-    let browser = checkBrowser();
-    if (browser.isFirefox) {
+  const openUri = () => {
+    if (browser.isFirefox()) {
       const browserVersion = getBrowserVersion();
       if (browserVersion >= 64) {
         openUriWithHiddenFrame(uri, failCallback, successCallback);
       } else {
         openUriUsingFirefox(uri, failCallback, successCallback);
       }
-    } else if (browser.isChrome || browser.isIOS) {
+    } else if (browser.isChrome()) {
       openUriWithTimeoutHack(uri, failCallback, successCallback);
-    } else if (browser.isIE) {
-      openUriUsingIEInOlderWindows(uri, failCallback, successCallback);
-    } else if (browser.isSafari) {
+    } else if (browser.isOSX()) {
       openUriWithHiddenFrame(uri, failCallback, successCallback);
     } else {
       //not supported, implement please
       unsupportedCallback();
+    }
+  };
+
+  if (browser.isEdge() || browser.isIE()) {
+    //for IE and Edge in Win 8 and Win 10
+    openUriWithMsLaunchUri(uri, failCb, successCb);
+  } else {
+    if (document.hasFocus()) {
+      openUri();
+    } else {
+      let focusHandler = registerEvent(window, "focus", () => {
+        focusHandler.remove();
+        openUri();
+      });
     }
   }
 };

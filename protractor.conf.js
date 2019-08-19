@@ -29,25 +29,6 @@ exports.config = {
           }
         }
       }
-    },
-    {
-      browserName: "firefox",
-      firefoxOptions: {
-        args: [],
-        prefs: {
-          custom_handlers: {
-            enabled: true,
-            registered_protocol_handlers: [
-              {
-                default: true,
-                protocol: "mailto",
-                title: "Gmail",
-                url: "#"
-              }
-            ]
-          }
-        }
-      }
     }
   ],
   jasmineNodeOpts: {
