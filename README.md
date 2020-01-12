@@ -14,6 +14,20 @@ _**Important feature:** If current tab is not active when it's trying to detect 
 - Safari: using hidden iframe onBlur to detect whether the focus is stolen. When the focus is stolen, it assumes that the custom protocol launches external app and therefore it exists.
 - IEs and Edge in Win 8/Win 10: the cleanest solution. IEs and Edge in Windows 8 and Windows 10 does provide an API to check the existence of custom protocol handlers. Other older IE versions are not supported.
 
+# Examples
+
+```js
+window.customProtocolCheck(
+  "mycustomprotocol://url",
+  () => {
+    console.log("Custom protocol not found.");
+  },
+  () => {
+    console.log("Custom protocol found and opened the file successfully.");
+  }
+);
+```
+
 # Known Issues
 
 - In some protocol such as "mailto:", IE seems to trigger the fail callback while continuing on opening the protocol just fine (tested in IE11/Win 10). This issue doesn't occur with a custom protocol.

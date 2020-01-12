@@ -1,14 +1,13 @@
 {
   "name": "custom-protocol-check",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Detect whether a custom protocol is available in browser (Chrome, Firefox, Safari, iOS, IE8-IE11 and Edge)",
   "main": "index.js",
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
     "start": "npm run build && webpack-dev-server --config ./webpack.config.js",
     "test": "start-server-and-test start http://localhost:9999 test:protractor",
-    "test:protractor": "protractor protractor.conf.js",
-    "postinstall": "webdriver-manager update && node ./node_modules/protractor/bin/webdriver-manager update"
+    "test:protractor": "protractor protractor.conf.js"
   },
   "repository": {
     "type": "git",
