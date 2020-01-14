@@ -17,8 +17,10 @@ _**Important feature:** If current tab is not active when it's trying to detect 
 # Examples
 
 ```js
-window.customProtocolCheck(
-  "mycustomprotocol://url",
+import customProtocolCheck from "custom-protocol-check";
+
+customProtocolCheck(
+  "mycustomprotocol://params",
   () => {
     console.log("Custom protocol not found.");
   },
