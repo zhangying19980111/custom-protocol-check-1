@@ -99,7 +99,7 @@ const browser = {
   }
 };
 
-const DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT = 2000;
+let DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT;
 
 const registerEvent = (target, eventType, cb) => {
   if (target.addEventListener) {
@@ -218,7 +218,7 @@ const getBrowserVersion = () => {
   return parseFloat(M[1]);
 };
 
-const protocolCheck = (uri, failCb, successCb, unsupportedCb) => {
+const protocolCheck = (uri, failCb, successCb, timeout = 2000, unsupportedCb) => {
   const failCallback = () => {
     failCb && failCb();
   };
@@ -248,6 +248,10 @@ const protocolCheck = (uri, failCb, successCb, unsupportedCb) => {
       unsupportedCallback();
     }
   };
+
+  if (timeout) {
+    DEFAULT_CUSTOM_PROTOCOL_FAIL_CALLBACK_TIMEOUT = timeout;
+  }
 
   if (browser.isEdge() || browser.isIE()) {
     //for IE and Edge in Win 8 and Win 10

@@ -45,13 +45,13 @@ module.exports = {
       analyzerMode: "static",
       openAnalyzer: false
     }),
-    new CopyPlugin([
-      {
-        from: minOutputFileName,
-        to: __dirname + "/demo/" + minOutputFileName,
-        force: true
-      }
-    ])
+    new CopyPlugin({
+      patterns: [
+        { from: minOutputFileName,
+          to: __dirname + "/demo/" + minOutputFileName, 
+        },
+      ],
+    }),
   ],
   optimization: {
     minimize: true,

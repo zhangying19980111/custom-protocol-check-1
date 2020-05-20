@@ -26,9 +26,17 @@ customProtocolCheck(
   },
   () => {
     console.log("Custom protocol found and opened the file successfully.");
-  }
+  }, 5000
 );
 ```
+
+### Options
+
+- `uri`: Custom protocol url to check for.
+- `failCb`: Callback function which gets called when custom protocol not found.
+- `successCb`: Callback function which gets called when custom protocol is found.
+- `timeout`: *(default: 2000)* Timeout in milliseconds. It waits for `timeout` unless it calls `failCb`. If protocol already exists then it would try to open the app right away. **Note:** Sometimes app associated with custom protocol might take time to open up and this solution rely on blur event, so adjust this setting as per your app's first screen loading time to prevent `failCb` getting called.
+- `unsupportedCb`: Callback function which gets called when browser is not supported.
 
 # Known Issues
 

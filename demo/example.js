@@ -9,7 +9,7 @@ $(function() {
       },
       function() {
         element.attr("result", "true");
-      }
+      }, 5000
     );
   });
 });
