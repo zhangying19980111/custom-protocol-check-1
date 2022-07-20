@@ -140,7 +140,7 @@ const openUriWithHiddenFrame = (uri, failCb, successCb) => {
     iframe = createHiddenIframe(document.body, "about:blank");
   }
 
-  onBlur = () => {
+  const onBlur = () => {
     clearTimeout(timeout);
     handler.remove();
     successCb();
@@ -162,7 +162,7 @@ const openUriWithTimeoutHack = (uri, failCb, successCb) => {
     target = target.parent;
   }
 
-  onBlur = () => {
+  const onBlur = () => {
     clearTimeout(timeout);
     handler.remove();
     successCb();
